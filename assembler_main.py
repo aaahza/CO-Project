@@ -332,7 +332,8 @@ def strip_label(instruction: str) -> str:
         new_instruction += ' ' + i
     return new_instruction.strip()
 
-
+# the code reads from in.txt and writes to out.txt the mcode
+# if no error is encountered otherwise it stops.
 if __name__ == "__main__":
     with open('in.txt', 'r') as rfile:
         variables_end_index = 0
