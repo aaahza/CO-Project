@@ -268,7 +268,7 @@ def make_instructions():
         elif i["type"] == "F":
             mcode += OP_code_typeF[i["inst"]]
             mcode += "0" * 11
-        machine_code.append(mcode + "\n")
+        machine_code.append(mcodef)
 
 
 # adds data(dict) about the instruction to instructions list
@@ -410,4 +410,4 @@ if __name__ == "__main__":
     #     wfile.truncate()
     #     wfile.writelines(machine_code)
 
-    sys.stdout.writelines(machine_code)
+    sys.stdout.writelines('\n'.join(machine_code))
