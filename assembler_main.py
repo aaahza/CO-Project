@@ -74,23 +74,23 @@ def is_typeA(instruction: str) -> bool:
                 if instruction[3] in reg_address.keys():
                     return True
                 elif instruction[1] == "FLAGS":
-                    print("Illegal use of FLAGS register")
+                    print("ERROR: Illegal use of FLAGS register")
                     exit()
                 else:
-                    print("Typos in instruction name or register name")
+                    print("ERROR: Typos in register name")
                     exit()
             elif instruction[1] == "FLAGS":
-                print("Illegal use of FLAGS register")
+                print("ERROR: Illegal use of FLAGS register")
                 exit()
             else:
-                print("Typos in instruction name or register name")
+                print("ERROR: Typos in register name")
                 exit()
 
         elif instruction[1] == "FLAGS":
-            print("Illegal use of FLAGS register")
+            print("ERROR: Illegal use of FLAGS register")
             exit()
         else:
-            print("Typos in instruction name or register name")
+            print("ERROR: Typos register name")
             exit()
     return False
 
@@ -111,21 +111,21 @@ def is_typeB(instruction: str) -> bool:
                     if instruction[2] <= max_imm:
                         return True
                     else:
-                        print("Illegal Immediate values")
+                        print("ERROR: Illegal Immediate values")
                         exit()
                 else:
-                    print("Illegal Immediate values")
+                    print("ERROR: Illegal Immediate values")
                     exit()
             elif instruction[2] in reg_address.keys():
                 return False
             else:
-                print("Typos in instruction name or register name")
+                print("ERROR: Typos in register name")
                 exit()
         elif instruction[1] == "FLAGS":
-            print("Illegal use of FLAGS register")
+            print("ERROR: Illegal use of FLAGS register")
             exit()
         else:
-            print("Typos in instruction name or register name")
+            print("ERROR: Typos register name")
             exit()
     return False
 
@@ -140,16 +140,16 @@ def is_typeC(instruction: str) -> bool:
 
     if instruction[0] in OP_code_typeC.keys():
         if instruction[1] == "FLAGS":
-            print("Illegal use of FLAGS register")
+            print("ERROR: Illegal use of FLAGS register")
             exit()
         elif instruction[1] in reg_address.keys():
             if instruction[2] in reg_address.keys():
                 return True
             else:
-                print("Typos in instruction name or register name")
+                print("ERROR: Typos in register name")
                 exit()
         else:
-            print("Typos in instruction name or register name")
+            print("ERROR: Typos in register name")
             exit()
     return False
 
@@ -167,16 +167,16 @@ def is_typeD(instruction: str) -> bool:
             if instruction[2] in variables:
                 return True
             elif instruction[1] in labels:
-                print("Misuse of labels as variables or vice-versa")
+                print("ERROR: Misuse of labels as variables")
                 exit()
             else:
-                print("Use of undefined variables")
+                print("ERROR: Use of undefined variables")
                 exit()
         elif instruction[1] == "FLAGS":
-            print("Illegal use of FLAGS register")
+            print("ERROR: Illegal use of FLAGS register")
             exit()
         else:
-            print("Typos in instruction name or register name")
+            print("ERROR: Typos in register name")
             exit()
     return False
 
@@ -193,10 +193,10 @@ def is_typeE(instruction: str) -> bool:
         if instruction[1] in labels:
             return True
         elif instruction[1] in variables:
-            print("Misuse of labels as variables or vice-versa")
+            print("ERROR: Misuse of variable as label")
             exit()
         else:
-            print("Use of undefined labels")
+            print("ERROR: Use of undefined labels")
             exit()
     return False
 
@@ -328,7 +328,7 @@ def handle_instruction(instruction):
         inst_dict["inst"] = inst_parts[0]
 
     else:
-        print("Typos in instruction name or register name")
+        print("ERROR: Typos in instruction name")
         exit()
 
     # Append the instruction dictionary to the instructions list
