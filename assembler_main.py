@@ -69,26 +69,26 @@ def is_typeA(instruction: str) -> bool:
         instruction[j] = i.strip()
 
     if instruction[0] in OP_code_typeA.keys():
-        if instruction[1] in reg_address.keys():
-            if instruction[2] in reg_address.keys():
-                if instruction[3] in reg_address.keys():
-                    return True
-                elif instruction[1] == "FLAGS":
+        if instruction[1] == "FLAGS":
+            print("ERROR: Illegal use of FLAGS register")
+            exit()
+        elif instruction[1] in reg_address.keys():
+            if instruction[2] == "FLAGS":
+                print("ERROR: Illegal use of FLAGS register")
+                exit()
+            elif instruction[2] in reg_address.keys():
+                if instruction[3] == "FLAGS":
                     print("ERROR: Illegal use of FLAGS register")
                     exit()
+                elif instruction[3] in reg_address.keys():
+                    return True
                 else:
                     print("ERROR: Typos in register name")
                     exit()
-            elif instruction[1] == "FLAGS":
-                print("ERROR: Illegal use of FLAGS register")
-                exit()
             else:
                 print("ERROR: Typos in register name")
                 exit()
 
-        elif instruction[1] == "FLAGS":
-            print("ERROR: Illegal use of FLAGS register")
-            exit()
         else:
             print("ERROR: Typos register name")
             exit()
@@ -104,7 +104,10 @@ def is_typeB(instruction: str) -> bool:
         instruction[j] = i.strip()
 
     if instruction[0] in OP_code_typeB.keys():
-        if instruction[1] in reg_address.keys():
+        if instruction[1] == "FLAGS":
+            print("ERROR: Illegal use of FLAGS register")
+            exit()
+        elif instruction[1] in reg_address.keys():
             if instruction[2][0] == "$":
                 if instruction[2][1:].isdigit():
                     instruction[2] = int(instruction[2][1:])
@@ -121,9 +124,6 @@ def is_typeB(instruction: str) -> bool:
             else:
                 print("ERROR: Typos in register name")
                 exit()
-        elif instruction[1] == "FLAGS":
-            print("ERROR: Illegal use of FLAGS register")
-            exit()
         else:
             print("ERROR: Typos register name")
             exit()
@@ -163,18 +163,18 @@ def is_typeD(instruction: str) -> bool:
         instruction[j] = i.strip()
 
     if instruction[0] in OP_code_typeD.keys():
-        if instruction[1] in reg_address.keys():
-            if instruction[2] in variables:
-                return True
-            elif instruction[1] in labels:
+        if instruction[1] == "FLAGS":
+            print("ERROR: Illegal use of FLAGS register")
+            exit()
+        elif instruction[1] in reg_address.keys():
+            if instruction[2] in labels:
                 print("ERROR: Misuse of labels as variables")
                 exit()
+            elif instruction[2] in variables:
+                return True
             else:
                 print("ERROR: Use of undefined variables")
                 exit()
-        elif instruction[1] == "FLAGS":
-            print("ERROR: Illegal use of FLAGS register")
-            exit()
         else:
             print("ERROR: Typos in register name")
             exit()
