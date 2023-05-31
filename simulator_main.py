@@ -1,10 +1,22 @@
 import sys
 from collections import OrderedDict
 
-registers = {"000": 0, "001": 0, "010": 0, "011": 0,
-             "100": 0, "101": 0, "110": 0, "111": 0}
+registers = OrderedDict(
+    (
+        ("000", 0),
+        ("001", 0),
+        ("010", 0),
+        ("011", 0),
+        ("100", 0),
+        ("101", 0),
+        ("110", 0),
+        ("111", 0),
+    )
+)
 
-ram = {} # will store the addressa as keys to values at that mem
+ram = OrderedDict()  # will store the addressa as keys to values at that mem
+
+PC = 0
 
 OP_code_typeA = {
     "add": "00000",
@@ -16,8 +28,7 @@ OP_code_typeA = {
 }
 
 OP_code_typeB = {"mov": "00010", "rs": "01000", "ls": "01001"}
-OP_code_typeC = {"mov": "00011", "div": "00111",
-                 "not": "01101", "cmp": "01110"}
+OP_code_typeC = {"mov": "00011", "div": "00111", "not": "01101", "cmp": "01110"}
 OP_code_typeD = {"ld": "00100", "st": "00101"}
 OP_code_typeE = {"jmp": "01111", "jlt": "11100", "jgt": "11101", "je": "11111"}
 OP_code_typeF = {"hlt": "11010"}
@@ -63,13 +74,40 @@ def control_unit(inst):
         ex_typeF(op_code)
 
 
-def print_mem():
-    pass
+def dump_mem():
+    for mem in ram.values():
+        print(mem)
+
+
+def convert_bin(num, num_bits):
+    temp = bin(num)
+    while len(temp) < num_bits:
+        temp = "0" + temp
+
+    return temp
+
+
+def bin_to_dec(str):
+    powr = 0
+    ans = 0
+    for i in str:
+        ans += int(i) * 2**pow
+        powr += 1
+    return ans
+
+
+def print_regs():
+    print(convert_bin(PC, 7))
+
+    for reg in registers.values():
+        print(convert_bin(reg, 16))
 
 
 def ex_typeA(op_code, dest, op1, op2):
     if op_code == "00000":  # add the op1 and op2 and store in dest
-        pass
+        registers[dest] = registers[op1] + registers[op2]
+        PC += 1
+
     elif op_code == "00001":  # sub the op1 and op2 and store in dest
         pass
     elif op_code == "00110":  # mul
@@ -98,26 +136,36 @@ def ex_typeC(op_code, dest, op1):
         pass
     elif op_code == "01101":  # not
         pass
-    elif op_code == "01110": # cmp 
+    elif op_code == "01110":  # cmp
         pass
 
 
 def ex_typeD(op_code, dest, mem):
-    if op_code == "00100":  # ld
-        pass
+    if op_code == "00100":  #
+        registers[dest] = bin_to_dec(ram[mem])
+
     elif op_code == "00101":  # st
-        pass
+        ram[mem] = convert_bin(registers[dest], 16)
+
 
 def ex_typeE(op_code, mem):
     if op_code == "01111":  # jmp
-        pass
-    elif op_code == "11100":  # jlt
-        pass
-    elif op_code == "11101":  # jgt
-        pass
-    elif op_code == "11111":  # je
-        pass
+        PC = bin_to_dec(mem)
 
+    elif op_code == "11100":  # jlt
+        if registers["111"] == 4:
+            PC = bin_to_dec(mem)
+            registers["111"] = 0
+
+    elif op_code == "11101":  # jgt
+        if registers["111"] == 2:
+            PC = bin_to_dec(mem)
+            registers["111"] = 0
+
+    elif op_code == "11111":  # je
+        if registers["111"] == 1:
+            PC = bin_to_dec(mem)
+            registers["111"] = 0
 
 
 def ex_typeF(op_code):
@@ -127,6 +175,13 @@ def ex_typeF(op_code):
 
 if __name__ == "__main__":
     lines = sys.stdin.readlines()
+    count = 0
     for line in lines:
-        pass
-    pass
+        line = line.strip()
+        ram[convert_bin(count, 7)] = lines
+
+    # execution of lines
+    line = lines[PC]
+    while line != "11010":
+        control_unit(line)
+        line = lines[PC]
