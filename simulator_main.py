@@ -105,13 +105,29 @@ def print_regs():
 
 def ex_typeA(op_code, dest, op1, op2):
     if op_code == "00000":  # add the op1 and op2 and store in dest
-        registers[dest] = registers[op1] + registers[op2]
+        sum = registers[op1] + registers[op2]
+        if sum <= reg_max and sum >= 0:
+            registers[dest] = sum
+        registers["111"] = 8
+        registers[dest] = 0
         PC += 1
 
     elif op_code == "00001":  # sub the op1 and op2 and store in dest
-        pass
+        diff = registers[op1] - registers[op2]
+        if diff <= reg_max and diff >= 0:
+            registers[dest] = diff
+        registers["111"] = 8
+        registers[dest] = 0
+        PC += 1
+
     elif op_code == "00110":  # mul
-        pass
+        prod = registers[op1] * registers[op2]
+        if prod <= reg_max and prod >= 0:
+            registers[dest] = prod
+        registers["111"] = 8
+        registers[dest] = 0
+        PC += 1
+
     elif op_code == "01010":  # xor
         pass
     elif op_code == "01011":  # or
@@ -122,7 +138,8 @@ def ex_typeA(op_code, dest, op1, op2):
 
 def ex_typeB(op_code, dest, imm):
     if op_code == "00010":  # mov the imm valuse in dest
-        pass
+        registers[dest] = bin_to_dec(imm)
+
     elif op_code == "01000":  # rs
         pass
     elif op_code == "01001":  # ls
@@ -131,9 +148,18 @@ def ex_typeB(op_code, dest, imm):
 
 def ex_typeC(op_code, dest, op1):
     if op_code == "00011":  # mov the value in op1 to dest
-        pass
+        registers[dest] = registers[op1]
+
     elif op_code == "00111":  # div
-        pass
+        if registers[op1] != 0:
+            quot = registers[dest]/registers[op1]
+            remain = registers[dest]/registers[op1]
+
+            registers[dest] = quot
+        registers["111"] = 8
+        registers[dest] = 0
+        registers[op1] = 0  
+        
     elif op_code == "01101":  # not
         pass
     elif op_code == "01110":  # cmp
