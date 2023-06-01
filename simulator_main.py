@@ -129,21 +129,155 @@ def ex_typeA(op_code, dest, op1, op2):
         PC += 1
 
     elif op_code == "01010":  # xor
-        pass
+        xor_ans=""
+        op1_len=len(op1)
+        op2_len=len(op2)
+
+        if op1_len>op2_len:
+            d=op1_len-op2_len
+            p=op2
+            q=op1
+            
+        else:
+            d=op2_len-op1_len
+            p=op1
+            q=op2
+
+        prefix=""
+        for i in range(0,d):
+            prefix+="0"
+            i+=1
+        
+        new_p=prefix+p
+        
+
+        new_len=len(new_p)
+
+        for i in range(0,new_len):
+            if new_p[i]=="1" and q[i]=="1":
+                xor_ans+="0"
+                i+=1
+            elif new_p[i]=="1" and q[i]=="0":
+                xor_ans+="1"
+                i+=1
+            elif new_p[i]=="0" and q[i]=="1":
+                xor_ans+="1"
+                i+=1
+            elif new_p[i]=="0" and q[i]=="0":
+                xor_ans+="0"
+                i+=1
+
+        if xor_ans<=reg_max and xor_ans>=0:          ### CHECK IF REGISTERS ARE CORRECT OR NOT
+            registers[dest]=xor_ans
+
+        PC+=1 
+
     elif op_code == "01011":  # or
-        pass
+        or_ans=""
+        op1_len=len(op1)
+        op2_len=len(op2)
+
+        if op1_len>op2_len:
+            d=op1_len-op2_len
+            p=op2
+            q=op1
+            
+        else:
+            d=op2_len-op1_len
+            p=op1
+            q=op2
+
+        prefix=""
+        for i in range(0,d):
+            prefix+="0"
+            i+=1
+        
+        new_p=prefix+p
+        new_len=len(new_p)
+
+        for i in range(0,new_len):
+            if new_p[i]=="1" and q[i]=="1":
+                or_ans+="1"
+                i+=1
+            elif new_p[i]=="1" and q[i]=="0":
+                or_ans+="1"
+                i+=1
+            elif new_p[i]=="0" and q[i]=="1":
+                or_ans+="1"
+                i+=1
+            elif new_p[i]=="0" and q[i]=="0":
+                or_ans+="0"
+                i+=1
+        
+        if or_ans<=reg_max and or_ans>=0:
+            registers[dest]=or_ans
+                                             ### CHECK IF REGISTERS ARE CORRECT OR NOT
+        PC+=1 
+
     elif op_code == "01100":  # and
-        pass
+        and_ans=""
+        op1_len=len(op1)
+        op2_len=len(op2)
+
+        if op1_len>op2_len:
+            d=op1_len-op2_len
+            p=op2
+            q=op1
+            
+        else:
+            d=op2_len-op1_len
+            p=op1
+            q=op2
+
+        prefix=""
+        for i in range(0,d):
+            prefix+="0"
+            i+=1
+        
+        new_p=prefix+p
+        new_len=len(new_p)
+
+        for i in range(0,new_len):
+            if new_p[i]=="1" and q[i]=="1":
+                and_ans+="1"
+                i+=1
+            elif new_p[i]=="1" and q[i]=="0":
+                and_ans+="1"
+                i+=1
+            elif new_p[i]=="0" and q[i]=="1":
+                and_ans+="1"
+                i+=1
+            elif new_p[i]=="0" and q[i]=="0":
+                and_ans+="0"
+                i+=1
+
+        if and_ans<=reg_max and and_ans>=0:
+            registers[dest]=and_ans             ### CHECK IF REGISTERS ARE CORRECT OR NOT 
+
+        PC+=1
 
 
 def ex_typeB(op_code, dest, imm):
     if op_code == "00010":  # mov the imm valuse in dest
         registers[dest] = bin_to_dec(imm)
 
-    elif op_code == "01000":  # rs
-        pass
-    elif op_code == "01001":  # ls
-        pass
+    elif op_code == "01000":  # rs           NEEDS TO BE IMPLEMENTED 
+        rs_val = registers[dest]/(2**bin_to_dec(imm))
+        if rs_val > reg_max or rs_val < 0:
+            registers[dest] = rs_val
+
+        registers["111"] = 8
+        registers[dest] = 0
+        PC += 1
+        
+    elif op_code == "01001":  # ls           NEEDS TO BE IMPLEMENTED
+        ls_val = registers[dest]*(2**bin_to_dec(imm))
+        if ls_val > reg_max or ls_val < 0:
+            registers[dest] = ls_val
+
+        registers["111"] = 8
+        registers[dest] = 0
+        PC += 1
 
 
 def ex_typeC(op_code, dest, op1):
@@ -154,15 +288,27 @@ def ex_typeC(op_code, dest, op1):
         if registers[op1] != 0:
             quot = registers[dest]/registers[op1]
             remain = registers[dest]/registers[op1]
-
             registers[dest] = quot
+            registers[op1] = remain
+
         registers["111"] = 8
         registers[dest] = 0
         registers[op1] = 0  
         
     elif op_code == "01101":  # not
-        pass
-    elif op_code == "01110":  # cmp
+        not_ans=""
+        len_op1=len(op1)
+        for i in range(0,len_op1):
+            if op1[i]=="1":
+                not_ans+="0"
+            elif op1[i]=="0":
+                not_ans+="1"
+            i+=1
+
+        registers[dest]=not_ans
+        PC += 1        
+        
+    elif op_code == "01110":  # cmp            NEEDS TO BE IMPLEMENTED
         pass
 
 
