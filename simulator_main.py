@@ -25,15 +25,27 @@ OP_code_typeA = {
     "xor": "01010",
     "or": "01011",
     "and": "01100",
+    "addf": "10000",
+    "subf": "10001"
 }
-
-OP_code_typeB = {"mov": "00010", "rs": "01000", "ls": "01001"}
-OP_code_typeC = {"mov": "00011", "div": "00111", "not": "01101", "cmp": "01110"}
+OP_code_typeB = {"mov": "00010", "rs": "01000", "ls": "01001", "movf": "10010"}
+OP_code_typeC = {"mov": "00011", "div": "00111",
+                 "not": "01101", "cmp": "01110"}
 OP_code_typeD = {"ld": "00100", "st": "00101"}
 OP_code_typeE = {"jmp": "01111", "jlt": "11100", "jgt": "11101", "je": "11111"}
 OP_code_typeF = {"hlt": "11010"}
 
 reg_max = 2**16 - 1
+max_float = 0b11_111_100
+min_float = 0b1
+
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 
 def control_unit(inst):
@@ -48,8 +60,12 @@ def control_unit(inst):
         ex_typeA(op_code, dest, op1, op2)
 
     elif op_code in OP_code_typeB.values():
-        dest = inst[6:9]
-        imm = inst[9:]
+        if op_code == "10010":
+            dest = inst[5:8]
+            imm = inst[8:]
+        else:
+            dest = inst[6:9]
+            imm = inst[9:]
 
         ex_typeB(op_code, dest, imm)
 
@@ -83,8 +99,24 @@ def convert_bin(num, num_bits):
     temp = bin(num)[2:]
     while len(temp) < num_bits:
         temp = "0" + temp
-
     return temp
+
+
+def convert_float(num):
+    flt = float(num)
+    inti = int(num)
+    frac = flt - inti
+    flt = bin(inti)[2:]
+    pow = len(flt) - 1
+    while len(flt) < 6:
+        frac = frac*2
+        flt += str(int(frac))
+        frac = frac - int(frac)
+    pow = bin(pow)[2:]
+    while len(pow) < 3:
+        pow = "0" + pow
+    flt = pow + flt[1:]
+    return "00000000"+flt
 
 
 def bin_to_dec(str):
@@ -96,10 +128,25 @@ def bin_to_dec(str):
     return ans
 
 
+def bin_to_float(num_str):
+    powr = bin_to_dec(num_str[:3])
+    inti = bin_to_dec("1"+num_str[3:3+powr])
+    frac = 0
+    factor = 1/2
+    for i in num_str[3+powr:]:
+        frac += int(i)*factor
+        factor /= 2
+    out = inti + frac
+    return out
+
+
 def print_regs():
-    print(convert_bin(PC, 7), end="        ")
+    print(convert_bin(PC, 7), end = "        ")
     for reg in registers.values():
-        print(convert_bin(reg, 16), end=" ")
+        if type(reg) == float:
+            print(convert_float(reg), end = " ")
+        else:
+            print(convert_bin(reg, 16), end=" ")
     print()
 
 
@@ -163,6 +210,28 @@ def ex_typeA(op_code, dest, op1, op2):
 
         print_regs()
         PC += 1
+    elif op_code == "10000":
+        sum = registers[op1] + registers[op2]
+        if sum <= max_float and sum >= min_float:
+            registers[dest] = sum
+            registers["111"] = 0
+        else:
+            registers["111"] = 8
+            registers[dest] = 0
+        print_regs()
+        PC += 1
+
+    elif op_code == "10001":  # sub the op1 and op2 and store in dest
+        diff = registers[op1] - registers[op2]
+        if diff <= max_float and diff >= min_float:
+            registers[dest] = diff
+            registers["111"] = 0
+        else:
+            registers["111"] = 8
+            registers[dest] = 0
+        print_regs()
+        PC += 1
+
 
 def ex_typeB(op_code, dest, imm):
     global PC
@@ -178,12 +247,9 @@ def ex_typeB(op_code, dest, imm):
         if rs_val > reg_max or rs_val < 0:
             registers[dest] = rs_val
             registers["111"] = 0
-
-
         else:
             registers["111"] = 8  # else tera baap likhega
             registers[dest] = 0
-
         print_regs()
         PC += 1
 
@@ -192,11 +258,15 @@ def ex_typeB(op_code, dest, imm):
         if ls_val > reg_max or ls_val < 0:
             registers[dest] = ls_val
             registers["111"] = 0
-
         else:
             registers["111"] = 8
             registers[dest] = 0
+        print_regs()
+        PC += 1
 
+    elif op_code == "10010":
+        registers[dest] = bin_to_float(imm)
+        registers["111"] = 0
         print_regs()
         PC += 1
 
@@ -232,7 +302,7 @@ def ex_typeC(op_code, dest, op1):
         PC += 1
 
     elif op_code == "01110":  # cmp
-        
+
         if registers[dest] == registers[op1]:
             registers["111"] = 1
         elif registers[dest] > registers[op1]:
@@ -268,7 +338,6 @@ def ex_typeE(op_code, mem):
 
         print_regs()
         PC = bin_to_dec(mem)
-        
 
     elif op_code == "11100":  # jlt
         if registers["111"] == 4:
@@ -288,7 +357,7 @@ def ex_typeE(op_code, mem):
             PC = bin_to_dec(mem)
         else:
             registers["111"] = 0
-            
+
             print_regs()
             PC += 1
 
@@ -331,4 +400,3 @@ if __name__ == "__main__":
     while 1:
         control_unit(cmd)
         cmd = ram[convert_bin(PC, 7)]
-
