@@ -2,7 +2,7 @@ import sys
 from collections import OrderedDict
 
 registers = OrderedDict(
-    (
+    ( 
         ("000", 0),
         ("001", 0),
         ("010", 0),
