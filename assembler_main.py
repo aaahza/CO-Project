@@ -9,12 +9,16 @@ OP_code_typeA = {
     "xor": "01010",
     "or": "01011",
     "and": "01100",
+    "addf": "10000",
+    "subf": "10001"
 }
-OP_code_typeB = {"mov": "00010", "rs": "01000", "ls": "01001"}
-OP_code_typeC = {"mov": "00011", "div": "00111", "not": "01101", "cmp": "01110"}
+OP_code_typeB = {"mov": "00010", "rs": "01000", "ls": "01001", "movf": "10010"}
+OP_code_typeC = {"mov": "00011", "div": "00111",
+                 "not": "01101", "cmp": "01110"}
 OP_code_typeD = {"ld": "00100", "st": "00101"}
 OP_code_typeE = {"jmp": "01111", "jlt": "11100", "jgt": "11101", "je": "11111"}
 OP_code_typeF = {"hlt": "11010"}
+
 
 # binary code of registers
 reg_address = {
@@ -33,6 +37,8 @@ labels = OrderedDict()  # dict of all labels and there addresss
 variables = OrderedDict()  # dict of all variables and there addresss
 
 max_imm = 127
+max_float = 0b11_111_100
+min_float = 0b1
 counter = 0b0_000_000  # counter to address the lables and variables
 # stores data(dict) about the instructions like op type, and oparands
 instructions = []
@@ -42,6 +48,12 @@ machine_code = []  # will store the final binary code
 # functions to find type of the instertion
 # these functions may call other functions to check errors
 
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 def is_var(instruction: str) -> bool:
     instruction = instruction.split()
@@ -112,6 +124,13 @@ def is_typeB(instruction: str) -> bool:
                 if instruction[2][1:].isdigit():
                     instruction[2] = int(instruction[2][1:])
                     if instruction[2] <= max_imm:
+                        return True
+                    else:
+                        print("ERROR: Illegal Immediate values")
+                        exit()
+                elif isfloat(instruction[2][1:]):
+                    instruction[2] = float(instruction[2][1:])
+                    if min_float <= instruction[2] <= max_float:
                         return True
                     else:
                         print("ERROR: Illegal Immediate values")
@@ -248,7 +267,8 @@ def make_instructions():
             mcode += reg_address[i["r3"]]
         elif i["type"] == "B":
             mcode += OP_code_typeB[i["inst"]]
-            mcode += "0"
+            if len(i["imm"]) == 7:
+                mcode += "0"
             mcode += reg_address[i["r1"]]
             mcode += i["imm"]
         elif i["type"] == "C":
@@ -293,9 +313,25 @@ def handle_instruction(instruction):
     elif is_typeB(instruction) == True:
         words = instruction.split()
         imm = words[-1].replace("$", "")
-        imm = bin(int(imm))[2:]
-        while len(imm) < 7:
-            imm = "0" + imm
+        if imm.isdigit():
+            imm = bin(int(imm))[2:]
+            while len(imm) < 7:
+                imm = "0" + imm
+        elif isfloat(imm):
+
+            imm = float(imm)
+            inti = int(imm)
+            frac = imm - inti
+            imm = bin(inti)[2:]
+            pow = len(imm) - 1
+            while len(imm) < 6:
+                frac = frac*2
+                imm +=  str(int(frac))
+                frac = frac - int(frac)
+            pow = bin(pow)[2:]
+            while len(pow) < 3:
+                pow = "0" + pow
+            imm = pow + imm[1:]
         inst_type = "B"
         inst_dict["type"] = inst_type
         inst_dict["inst"] = inst_parts[0]
