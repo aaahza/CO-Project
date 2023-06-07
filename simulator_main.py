@@ -143,10 +143,10 @@ def bin_to_float(num_str):
 def print_regs():
     print(convert_bin(PC, 7), end = "        ")
     for reg in registers.values():
-        if type(reg) == float:
-            print(convert_float(reg), end = " ")
-        else:
+        if type(reg) == int:
             print(convert_bin(reg, 16), end=" ")
+        else:
+            print(convert_float(reg), end = " ")
     print()
 
 
@@ -191,21 +191,21 @@ def ex_typeA(op_code, dest, op1, op2):
         PC += 1
 
     elif op_code == "01010":  # xor
-        registers[dest] = convert_bin((registers[op1] ^ registers[op2]), 16)
+        registers[dest] = registers[op1] ^ registers[op2]
         registers["111"] = 0
 
         print_regs()
         PC += 1
 
     elif op_code == "01011":  # or
-        registers[dest] = convert_bin((registers[op1] | registers[op2]), 16)
+        registers[dest] = registers[op1] | registers[op2]
         registers["111"] = 0
 
         print_regs()
         PC += 1
 
     elif op_code == "01100":  # and
-        registers[dest] = convert_bin((registers[op1] & registers[op2]), 16)
+        registers[dest] = registers[op1] & registers[op2]
         registers["111"] = 0
 
         print_regs()
@@ -297,7 +297,12 @@ def ex_typeC(op_code, dest, op1):
         PC += 1
 
     elif op_code == "01101":  # not
-        registers[dest] = convert_bin(~bin_to_dec(op1), 16)
+        temp = convert_bin(registers[op1], 16)
+        out = ""
+        for i in range(len(temp)):
+            if temp[i] == "0": out += "1"
+            else: out += "0"
+        registers[dest] = bin_to_dec(out)
         print_regs()
         PC += 1
 
@@ -317,14 +322,20 @@ def ex_typeC(op_code, dest, op1):
 def ex_typeD(op_code, dest, mem):
     global PC
     if op_code == "00100":  # ld
-        registers[dest] = bin_to_dec(ram[mem])
+        if type(registers[dest]) == int:
+            registers[dest] = bin_to_dec(ram[mem])
+        else:
+            registers[dest] = bin_to_float(ram[mem])
         registers["111"] = 0
 
         print_regs()
         PC += 1
 
     elif op_code == "00101":  # st
-        ram[mem] = convert_bin(registers[dest], 16)
+        if type(registers[dest]) == int:
+            ram[mem] = convert_bin(registers[dest], 16)
+        else:
+            ram[mem] = convert_float(registers[dest])
         registers["111"] = 0
 
         print_regs()
@@ -376,6 +387,8 @@ def ex_typeE(op_code, mem):
 def ex_typeF(op_code):
     global PC
     if op_code == "11010":
+        registers["111"] = 0
+
         print_regs()
         PC += 1
         dump_mem()
