@@ -412,7 +412,7 @@ if __name__ == "__main__":
         counter += 1
     address_variables()
     for line in lines[variables_end_index:-1]:
-        line = line.strip("/n")
+        line = line.strip("\n")
         line = line.strip()
         # print(line.split())
         if line == "":
